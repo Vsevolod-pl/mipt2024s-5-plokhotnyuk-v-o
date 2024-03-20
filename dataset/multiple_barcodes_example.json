@@ -1,0 +1,49 @@
+{
+    "IMG_20240320_184618_340.jpg813086": {
+        "filename": "IMG_20240320_184618_340.jpg",
+        "size": 813086,
+        "regions": [
+            {
+                "shape_attributes": {
+                    "name": "polygon",
+                    "all_points_x": [
+                        655,
+                        660,
+                        586,
+                        583
+                    ],
+                    "all_points_y": [
+                        594,
+                        774,
+                        774,
+                        592
+                    ]
+                },
+                "region_attributes": {
+                    "barcode": "1d"
+                }
+            },
+            {
+                "shape_attributes": {
+                    "name": "polygon",
+                    "all_points_x": [
+                        366,
+                        451,
+                        450,
+                        366
+                    ],
+                    "all_points_y": [
+                        1356,
+                        1356,
+                        1445,
+                        1444
+                    ]
+                },
+                "region_attributes": {
+                    "barcode": "2d"
+                }
+            }
+        ],
+        "file_attributes": {}
+    }
+}
