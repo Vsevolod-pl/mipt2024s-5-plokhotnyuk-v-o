@@ -33,6 +33,36 @@ def aligned_affine(bar, M, fix_position=True):
     return img, M@corners
 
 
+def generate_perspective_distort(img, alpha=0.1, beta=0.01):
+    xps = [0, 0, 1, 1]
+    yps = [1, 0, 0, 1]
+    height, width, _ = img.shape
+    corners = np.array([[x*width, y*height, 1] for x, y in zip(xps, yps)]).T
+
+    M = np.zeros((3,3))
+    M[:-1,:-1] = np.random.randn(2, 2)*alpha + np.eye(2)*(1.-alpha)
+    M[-1, :-1] = beta*np.abs(np.random.randn(1,2))
+    M[:-1,-1] *= 0
+    M[-1,-1] = 1
+    coords = (M@corners)[:-1]
+    M[:-1,-1] = -np.min(coords, axis=-1)
+    return M
+
+
+def aligned_perspective(img, M):
+    xps = [0, 0, 1, 1]
+    yps = [1, 0, 0, 1]
+    height, width, _ = img.shape
+    corners = np.array([[x*width, y*height, 1] for x, y in zip(xps, yps)]).T
+    coords = M@corners
+    coords = coords[:-1]/coords[-1]
+    
+    new_sz = np.ceil(np.max(coords, axis=-1)).astype(np.int32)
+    
+    img = cv2.warpPerspective(img, M, new_sz)
+    return img, coords
+
+
 def coords_to_regions(coords, dimensions):
     res = []
     for i in range(len(coords)):
@@ -49,7 +79,8 @@ def coords_to_regions(coords, dimensions):
 
 
 def export(img, name, coords, dimensions):
-    plt.imsave(f'{name}.jpg', np.clip(img, 0, 1))
+    #np.clip(img, 0, 1)
+    plt.imsave(f'{name}.jpg', img)
     res = {f'{name}.jpg813086': {'filename': f'../code/{name}.jpg',
     'size': 813086,
     'regions': coords_to_regions(coords, dimensions),
@@ -57,14 +88,22 @@ def export(img, name, coords, dimensions):
     save_json(res, f'{name}.json')
 
 
-def generate_distorted(barcode_types, content_barcodes, distortions=None):
-    if distortions is None:
-        distortions = np.random.randn(len(barcode_types), 2, 3)
+def generate_distorted(barcode_types, content_barcodes, source_img=None, distortions=None):
     barimgs = [treepoem.generate_barcode(typ, content) for typ, content in zip(barcode_types, content_barcodes)]
-    imgs, coords = zip(*[aligned_affine(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
-    masks, _ = zip(*[aligned_affine(np.ones_like(img), dis) for img, dis in zip(barimgs, distortions)])
-    width, height = np.max(coords, axis=(0, 2))*2
-    combined = np.zeros((int(width), int(height), 3))
+    if distortions is None:
+        distortions = [generate_perspective_distort(np.array(img)) for img in barimgs]
+    # imgs, coords = zip(*[aligned_affine(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
+    imgs, coords = zip(*[aligned_perspective(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
+    # masks, _ = zip(*[aligned_affine(np.ones_like(img), dis) for img, dis in zip(barimgs, distortions)])
+    masks, _ = zip(*[aligned_perspective(np.ones_like(img), dis) for img, dis in zip(barimgs, distortions)])
+    
+    if source_img is None:
+        width, height, _ = np.max([img.shape for img in imgs], axis=0)*len(imgs)//3
+        combined = np.zeros((width, height, 3), dtype=imgs[0].dtype)
+    else:
+        combined = plt.imread(source_img)[:,:,:3]
+        width, height, _ = combined.shape
+
     for i in range(len(imgs)):
         w, h, _ = imgs[i].shape
         dw = np.random.randint(0, width - w)
@@ -90,7 +129,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     conf = load_json(args.config)
-    img, coords = generate_distorted(conf['barcode_types'], conf['barcode_contents'])
+    img, coords = generate_distorted(conf['barcode_types'], conf['barcode_contents'], conf['source_img'])
     export(img, conf['name'], coords, conf['barcode_dimensions'])
 
     # barimg = treepoem.generate_barcode(args.barcode_type, args.content_barcode)
