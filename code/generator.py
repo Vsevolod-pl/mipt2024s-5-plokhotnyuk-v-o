@@ -48,6 +48,47 @@ def generate_perspective_distort(img, alpha=0.1, beta=0.01):
     M[:-1,-1] = -np.min(coords, axis=-1)
     return M
 
+def generate_aligned_perspective_distort(img, scale=0.1):
+    xps = [0, 0, 1, 1]
+    yps = [1, 0, 0, 1]
+    height, width, _ = img.shape
+    corners = np.array([[x*width, y*height] for x, y in zip(xps, yps)])
+    corners_old = corners.copy()
+
+    dx, dy = np.random.exponential(scale=width*scale, size=corners.shape).T
+
+    corners[0,0] -= dx[0]
+    corners[0,1] += dy[0]
+
+    corners[1,0] -= dx[1]
+    corners[1,1] -= dy[1]
+
+    corners[2,0] += dx[2]
+    corners[2,1] -= dy[2]
+
+    corners[3,0] += dx[3]
+    corners[3,1] += dy[3]
+
+    theta = np.math.pi*np.random.random()*2
+    c, s = np.cos(theta), np.sin(theta)
+    R = np.array(((c, -s), (s, c)))
+
+    corners = corners@R
+
+    M = cv2.getPerspectiveTransform(corners_old.astype(np.float32), corners.astype(np.float32))
+
+    corners = np.array([[x*width, y*height, 1] for x, y in zip(xps, yps)]).T
+    M[:-1,-1] *= 0
+    M[-1,-1] = 1
+    coords = (M@corners)[:-1]
+    M[:-1,-1] = -np.min(coords, axis=-1)
+    coords = M@corners
+    coords = coords[:-1]/coords[-1]
+
+    new_sz = np.ceil(np.max(coords, axis=-1)).astype(np.int32)
+
+    return M
+
 
 def aligned_perspective(img, M):
     xps = [0, 0, 1, 1]
@@ -91,7 +132,7 @@ def export(img, name, coords, dimensions):
 def generate_distorted(barcode_types, content_barcodes, source_img=None, distortions=None):
     barimgs = [treepoem.generate_barcode(typ, content) for typ, content in zip(barcode_types, content_barcodes)]
     if distortions is None:
-        distortions = [generate_perspective_distort(np.array(img)) for img in barimgs]
+        distortions = [generate_aligned_perspective_distort(np.array(img)) for img in barimgs]
     # imgs, coords = zip(*[aligned_affine(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
     imgs, coords = zip(*[aligned_perspective(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
     # masks, _ = zip(*[aligned_affine(np.ones_like(img), dis) for img, dis in zip(barimgs, distortions)])
@@ -106,6 +147,8 @@ def generate_distorted(barcode_types, content_barcodes, source_img=None, distort
 
     for i in range(len(imgs)):
         w, h, _ = imgs[i].shape
+        if width - w < 0 or height -h < 0:
+            continue
         dw = np.random.randint(0, width - w)
         dh = np.random.randint(0, height - h)
         coords[i][0] += dh
