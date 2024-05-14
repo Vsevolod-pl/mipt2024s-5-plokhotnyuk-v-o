@@ -5,6 +5,9 @@ import treepoem
 import numpy as np
 from matplotlib import pyplot as plt
 
+from data_generator import gens, dims
+from augmentations import augs
+
 
 def load_json(fname, *args, **kwargs):
     with open(fname) as f:
@@ -129,8 +132,11 @@ def export(img, name, coords, dimensions):
     save_json(res, f'{name}.json')
 
 
-def generate_distorted(barcode_types, content_barcodes, source_img=None, distortions=None):
-    barimgs = [treepoem.generate_barcode(typ, content) for typ, content in zip(barcode_types, content_barcodes)]
+def generate_distorted(barcode_types, content_barcodes, source_img=None, augms=[], distortions=None):
+    # barimgs = [treepoem.generate_barcode(typ, content) for typ, content in zip(barcode_types, content_barcodes)]
+    barimgs = [np.array(treepoem.generate_barcode(typ, content)) for typ, content in zip(barcode_types, content_barcodes)]
+    for aug_name in augms:
+        barimgs = [augs[aug_name](img) for img in barimgs]
     if distortions is None:
         distortions = [generate_aligned_perspective_distort(np.array(img)) for img in barimgs]
     # imgs, coords = zip(*[aligned_affine(np.array(img), dis) for img, dis in zip(barimgs, distortions)])
@@ -172,8 +178,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     conf = load_json(args.config)
-    img, coords = generate_distorted(conf['barcode_types'], conf['barcode_contents'], conf['source_img'])
-    export(img, conf['name'], coords, conf['barcode_dimensions'])
+    contents = conf.get('barcode_contents', None)
+    if contents is None:
+        contents = [gens[bar_type]() for bar_type in conf['barcode_types']]
+    img, coords = generate_distorted(conf['barcode_types'], contents, conf['source_img'],
+                                     augms=conf.get('augmentations', []))
+    dimensions = [dims[bar_type] for bar_type in conf['barcode_types']]
+    export(img, conf['name'], coords, dimensions)
 
     # barimg = treepoem.generate_barcode(args.barcode_type, args.content_barcode)
     # img, coords = aligned_affine(np.array(barimg), np.random.randn(2, 3))
