@@ -1,10 +1,12 @@
 from random import randint
 import random
 
+
 def calc_check_digit(upc):
-    check_sum = sum(int(x) * (3 if i % 2 == 0 else 1) for i, x in enumerate(upc))
+    check_sum = sum(int(x) * (1 + (1 - i % 2) * 2) for i, x in enumerate(upc))
     check_digit = (10 - (check_sum % 10)) % 10
     return str(check_digit)
+
 
 def generate_upca():
     upc_prefix = "0"
@@ -13,17 +15,20 @@ def generate_upca():
     upc = upc_prefix + upc_middle + upc_check_digit
     return upc
 
+
 def generate_code39():
     # Define the characters allowed in a Code 39 barcode
-    code39_characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%'
-    
-    code39_data = ''.join(random.choices(code39_characters, k=10))  # Generate random data of length 10
-    
+    code39_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%'
+
+    code39_data = ''.join(random.choices(code39_chars, k=10))
+    # Generate random data of length 10
+
     # Calculate the checksum character for Code 39
-    checksum = sum([code39_characters.index(char) for char in code39_data]) % 43
-    code39_encoded = code39_data + code39_characters[checksum]
-    
+    checksum = sum([code39_chars.index(char) for char in code39_data]) % 43
+    code39_encoded = code39_data + code39_chars[checksum]
+
     return code39_encoded
+
 
 def generate_code93(length=None):
     if length is None:
@@ -32,8 +37,10 @@ def generate_code93(length=None):
     input_data = [random.choice(characters) for _ in range(length)]
     return ''.join(input_data)
 
+
 def random_ascii(sz=256):
     return ''.join([chr(randint(0, 127)) for i in range(randint(1, sz))])
+
 
 gens = {
     'ean13': lambda: str(randint(10**11, 10**12-1)),
@@ -47,6 +54,7 @@ gens = {
     'aztecrune': lambda: str(randint(0, 255)),
     'microqrcode': lambda: random_ascii(35),
 }
+
 
 dims = {
     'ean13': '1d',
