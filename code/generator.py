@@ -174,16 +174,16 @@ def generate_distorted(barcode_types, content_barcodes, source_img=None,
 
     for i in range(len(imgs)):
         w, h, _ = imgs[i].shape
-        if width - w < 0 or height - h < 0:
-            continue
-        dw = np.random.randint(0, width - w)
-        dh = np.random.randint(0, height - h)
+        # if width - w < 0 or height - h < 0:
+        #     continue
+        dw = np.random.randint(0, max(width - w, 10))
+        dh = np.random.randint(0, max(height - h, 10))
         coords[i][0] += dh
         coords[i][1] += dw
         expanded_img = np.zeros_like(combined)
-        expanded_img[dw:w+dw, dh:h+dh] = imgs[i]
+        expanded_img[dw:w+dw, dh:h+dh] = imgs[i][:width-dw, :height-dh]
         expanded_mask = np.zeros_like(combined)
-        expanded_mask[dw:w+dw, dh:h+dh] = masks[i]
+        expanded_mask[dw:w+dw, dh:h+dh] = masks[i][:width-dw, :height-dh]
         combined = combined*(1-expanded_mask) + expanded_img
     return combined, coords
 
@@ -198,7 +198,8 @@ if __name__ == '__main__':
     contents = conf.get('barcode_contents', None)
     if contents is None:
         contents = [gens[bar_type]() for bar_type in conf['barcode_types']]
-    img, coords = generate_distorted(conf['barcode_types'], contents, conf['source_img'],
+    img, coords = generate_distorted(conf['barcode_types'], contents,
+                                     source_img=conf.get('source_img', None),
                                      augms=conf.get('augmentations', []))
     dimensions = [dims[bar_type] for bar_type in conf['barcode_types']]
     export(img, conf['name'], coords, dimensions)
