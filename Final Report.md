@@ -32,13 +32,29 @@
 - `barcode_contents` - список строк или чисел которые будут записаны в бар кодах
 - `source_img` - путь до изображения поверх которого будет рисоваться бар коды
 - `augmentations` - список аугментаций которые будут применены к бар кодам, список аугментаций можно найти в [таблице](#Таблица доступных аугментаций)
-
-### Пример запуска
-Запуск с текущим конфигом `python .\generator.py -c="test_conf.json"` генерирует следующее изображение:  
-![Шаг 1](code/test.jpg)
-После импорта в VIA выглядит вот так:  
-![Шаг 1](exported_to_VIA.png)
 ## Приложение
+### Пример запуска
+Запуск `python .\generator.py -c="test_conf.json"` с конфигом
+```json
+{
+	"name":"test",
+	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],
+	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],
+	"source_img": "./example.jpg",
+	"scale": 0.4
+}
+```
+генерирует следующее изображение:  
+![Шаг 1](generation_examples/generation.jpg)
+После импорта в VIA выглядит вот так:  
+![Шаг 1](generation_examples/exported_to_VIA.png)
+Вариации параметра `scale` выглядят следующим образом
+
+| scale=1                                                                          | scale=0.5                                                                       | scale=0.1                                                                       |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| ![img](generation_examples/high_scale.jpg)                                       | ![img](generation_examples/mid_scale.jpg)                                       | ![img](generation_examples/low_scale.jpg)                                       |
+| <img src="generation_examples/high_scale.jpg" alt="img" style="max-width: 30%;"> | <img src="generation_examples/mid_scale.jpg" alt="img" style="max-width: 30%;"> | <img src="generation_examples/low_scale.jpg" alt="img" style="max-width: 30%;"> |
+
 ### Таблица бар кодов для которых поддерживается автоматическая генерация контента
 
 | Название    | Размерность | Пример контента                         | Пример генерации                          |
@@ -55,12 +71,12 @@
 | microqrcode | 2d          | `/NRt`                                  | ![img](bar_code_examples/microqrcode.jpg) |
 ### Таблица доступных аугментаций
 
-| Название            | Пример аугментации                                        |
-| ------------------- | --------------------------------------------------------- |
-| BadPhotoCopy        | ![img](../augmentations_examples/BadPhotoCopy.jpg)        |
-| BrightnessTexturize | ![img](../augmentations_examples/BrightnessTexturize.jpg) |
-| ColorPaper          | ![img](../augmentations_examples/ColorPaper.jpg)          |
-| Folding             | ![img](../augmentations_examples/Folding.jpg)             |
-| LightingGradient    | ![img](../augmentations_examples/LightingGradient.jpg)    |
-| NoisyLines          | ![img](../augmentations_examples/NoisyLines.jpg)          |
-| ShadowCast          | ![img](../augmentations_examples/ShadowCast.jpg)          |
+| Название            | Пример аугментации                                     |
+| ------------------- | ------------------------------------------------------ |
+| BadPhotoCopy        | ![img](augmentations_examples/BadPhotoCopy.jpg)        |
+| BrightnessTexturize | ![img](augmentations_examples/BrightnessTexturize.jpg) |
+| ColorPaper          | ![img](augmentations_examples/ColorPaper.jpg)          |
+| Folding             | ![img](augmentations_examples/Folding.jpg)             |
+| LightingGradient    | ![img](augmentations_examples/LightingGradient.jpg)    |
+| NoisyLines          | ![img](augmentations_examples/NoisyLines.jpg)          |
+| ShadowCast          | ![img](augmentations_examples/ShadowCast.jpg)          |
