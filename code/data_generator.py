@@ -52,7 +52,7 @@ gens = {
     'qrcode': random_ascii,
     'azteccode': random_ascii,
     'aztecrune': lambda: str(randint(0, 255)),
-    'microqrcode': lambda: random_ascii(35),
+    'microqrcode': lambda: random_ascii(10),
 }
 
 
