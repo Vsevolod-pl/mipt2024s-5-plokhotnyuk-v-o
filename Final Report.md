@@ -32,17 +32,19 @@
 - `barcode_contents` - список строк или чисел которые будут записаны в бар кодах
 - `source_img` - путь до изображения поверх которого будет рисоваться бар коды
 - `augmentations` - список аугментаций которые будут применены к бар кодам, список аугментаций можно найти в [таблице](#Таблица доступных аугментаций)
-- `scale` - число > 0, масштабирует изображение, уменьшая или увеличивая вероятность пересечения бар кодов
+- `source_scale` - число > 0, масштабирует изображение, уменьшая или увеличивая вероятность пересечения бар кодов
+- `noise_scale` - число > 0, степенью проективных деформаций баркодов, см. примеры генерации
+- `barcode_scales` - список чисел > 0 для каждого из бар кодов, задает во сколько раз будет увеличен или уменьшен каждый из них на итоговом изображении
 ## Приложение
 ### Пример запуска
 Запуск `python .\generator.py -c="test_conf.json"` с конфигом
 ```json
 {
-	"name":"test",
-	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],
-	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],
-	"source_img": "./example.jpg",
-	"scale": 0.4
+    "name":"test",
+    "barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],
+    "augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],
+    "source_img": "./example.jpg",
+    "source_scale": 0.4
 }
 ```
 генерирует следующее изображение:  
@@ -52,9 +54,9 @@
 
 ![img](generation_examples/exported_to_VIA.png)
 
-Вариации параметра `scale` выглядят следующим образом
+Вариации параметра `source_scale` выглядят следующим образом
 
-| scale=1                                                                                                                                                 | scale=0.5                                                                                                                                              | scale=0.1                                                                                                                                              |
+| source_scale=1                                                                                                                                                 | source_scale=0.5                                                                                                                                              | source_scale=0.1                                                                                                                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | <img src="generation_examples/high_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> | <img src="generation_examples/mid_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> | <img src="generation_examples/low_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> |
 ### Таблица бар кодов для которых поддерживается автоматическая генерация контента
@@ -85,8 +87,12 @@
 ### Таблица примеров генераций с разными конфигами
 | конфиг                                                                                                                                                                                                                                                                      | результат генерации                                                                                   |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| <pre>{<br>	"name": "no_background_2d",<br>	"barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br>	"augmentations": ["ColorPaper"],<br>	"scale": 1<br>}</pre>                                                                               | <img src="generation_examples/no_background_2d.jpg" alt="img" style="max-width: 200px; height:auto;"> |
-| <pre>{<br>	"name": "no_background",<br>	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>	"scale": 1<br>}</pre>                              | <img src="generation_examples/no_background.jpg" alt="img" style="max-width: 200px; height:auto;">    |
-| <pre>{<br>	"name": "bottles_1d",<br>	"barcode_types": ["ean13", "plessey", "code39", "upca", "code93"],<br>	"augmentations": [],<br>	"source_img": "./bottles.jpg",<br>	"scale": 4<br>}</pre>                                                                               | <img src="generation_examples/bottles_1d.jpg" alt="img" style="max-width: 200px; height:auto;">       |
-| <pre>{<br>	"name": "bottles",<br>	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>	"source_img": "./bottles.jpg",<br>	"scale": 2<br>}</pre> | <img src="generation_examples/bottles.jpg" alt="img" style="max-width: 200px; height:auto;">          |
-| <pre>{<br>	"name": "waterfall_2d",<br>	"barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br>	"augmentations": ["ShadowCast", "BadPhotoCopy", "NoisyLines"],<br>	"source_img": "./example.jpg",<br>	"scale": 0.4<br>}</pre>                | <img src="generation_examples/waterfall_2d.jpg" alt="img" style="max-width: 200px; height:auto;">     |
+| <pre lang="json">{<br>    "name": "no_background_2d",<br> "barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br> "augmentations": ["ColorPaper"],<br>    "source_scale": 1<br>}</pre>                                                                               | <img src="generation_examples/no_background_2d.jpg" alt="img" style="max-width: 200px; height:auto;"> |
+| <pre lang="json">{<br>    "name": "no_background",<br>    "barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>  "augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>   "source_scale": 1<br>}</pre>                              | <img src="generation_examples/no_background.jpg" alt="img" style="max-width: 200px; height:auto;">    |
+| <pre lang="json">{<br>    "name": "bottles_1d",<br>   "barcode_types": ["ean13", "plessey", "code39", "upca", "code93"],<br>  "augmentations": [],<br>    "source_img": "./bottles.jpg",<br>  "source_scale": 4<br>}</pre>                                                                               | <img src="generation_examples/bottles_1d.jpg" alt="img" style="max-width: 200px; height:auto;">       |
+| <pre lang="json">{<br>    "name": "bottles",<br>  "barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>  "augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>   "source_img": "./bottles.jpg",<br>  "source_scale": 2<br>}</pre> | <img src="generation_examples/bottles.jpg" alt="img" style="max-width: 200px; height:auto;">          |
+| <pre lang="json">{<br>    "name": "waterfall_2d",<br> "barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br> "augmentations": ["ShadowCast", "BadPhotoCopy", "NoisyLines"],<br>  "source_img": "./example.jpg",<br>  "source_scale": 0.4<br>}</pre>                | <img src="generation_examples/waterfall_2d.jpg" alt="img" style="max-width: 200px; height:auto;">     |
+| <pre lang="json">{<br>    "name": "different_bar_code_scales",<br>    "barcode_types": ["ean13", "ean13", "ean13", "ean13", "ean13", "ean13", "ean13"],<br>    "barcode_scales": [9, 3, 3, 1.5, 1.5, 1, 0.5],<br>   "augmentations": ["ShadowCast", "BrightnessTexturize"],<br>  "source_img": "./example.jpg",<br>  "noise_scale": 0,<br>  "source_scale": 0.1<br>}</pre>                | <img src="generation_examples/different_bar_code_scales.jpg" alt="img" style="max-width: 200px; height:auto;">     |
+| <pre lang="json">{<br>    "name": "noise_scale_small",<br>    "barcode_types": ["ean13", "ean13", "ean13", "ean13", "ean13", "ean13", "ean13"],<br>    "barcode_scales": [9, 3, 3, 1.5, 1.5, 1, 0.5],<br>   "augmentations": ["ShadowCast", "BrightnessTexturize"],<br>  "source_img": "./example.jpg",<br>  "noise_scale": 0.1,<br>  "source_scale": 1<br>}</pre>                | <img src="generation_examples/noise_scale_small.jpg" alt="img" style="max-width: 200px; height:auto;">     |
+| <pre lang="json">{<br>    "name": "noise_scale_mid",<br>    "barcode_types": ["ean13", "ean13", "ean13", "ean13", "ean13", "ean13", "ean13"],<br>    "barcode_scales": [9, 3, 3, 1.5, 1.5, 1, 0.5],<br>   "augmentations": ["ShadowCast", "BrightnessTexturize"],<br>  "source_img": "./example.jpg",<br>  "noise_scale": 0.3,<br>  "source_scale": 1<br>}</pre>                | <img src="generation_examples/noise_scale_mid.jpg" alt="img" style="max-width: 200px; height:auto;">     |
+| <pre lang="json">{<br>    "name": "noise_scale_high",<br>    "barcode_types": ["ean13", "ean13", "ean13", "ean13", "ean13", "ean13", "ean13"],<br>    "barcode_scales": [9, 3, 3, 1.5, 1.5, 1, 0.5],<br>   "augmentations": ["ShadowCast", "BrightnessTexturize"],<br>  "source_img": "./example.jpg",<br>  "noise_scale": 1,<br>  "source_scale": 2<br>}</pre>                | <img src="generation_examples/noise_scale_high.jpg" alt="img" style="max-width: 200px; height:auto;">     |
