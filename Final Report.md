@@ -32,6 +32,7 @@
 - `barcode_contents` - список строк или чисел которые будут записаны в бар кодах
 - `source_img` - путь до изображения поверх которого будет рисоваться бар коды
 - `augmentations` - список аугментаций которые будут применены к бар кодам, список аугментаций можно найти в [таблице](#Таблица доступных аугментаций)
+- `scale` - число > 0, масштабирует изображение, уменьшая или увеличивая вероятность пересечения бар кодов
 ## Приложение
 ### Пример запуска
 Запуск `python .\generator.py -c="test_conf.json"` с конфигом
@@ -45,16 +46,17 @@
 }
 ```
 генерирует следующее изображение:  
-![Шаг 1](generation_examples/generation.jpg)
+![img](generation_examples/generation.jpg)
+
 После импорта в VIA выглядит вот так:  
-![Шаг 1](generation_examples/exported_to_VIA.png)
+
+![img](generation_examples/exported_to_VIA.png)
+
 Вариации параметра `scale` выглядят следующим образом
 
-| scale=1                                                                          | scale=0.5                                                                       | scale=0.1                                                                       |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| ![img](generation_examples/high_scale.jpg)                                       | ![img](generation_examples/mid_scale.jpg)                                       | ![img](generation_examples/low_scale.jpg)                                       |
-| <img src="generation_examples/high_scale.jpg" alt="img" style="max-width: 30%;"> | <img src="generation_examples/mid_scale.jpg" alt="img" style="max-width: 30%;"> | <img src="generation_examples/low_scale.jpg" alt="img" style="max-width: 30%;"> |
-
+| scale=1                                                                                                                                                 | scale=0.5                                                                                                                                              | scale=0.1                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="generation_examples/high_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> | <img src="generation_examples/mid_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> | <img src="generation_examples/low_scale.jpg" alt="img" style="max-width: 200px; height:auto;"> |
 ### Таблица бар кодов для которых поддерживается автоматическая генерация контента
 
 | Название    | Размерность | Пример контента                         | Пример генерации                          |
@@ -71,12 +73,20 @@
 | microqrcode | 2d          | `/NRt`                                  | ![img](bar_code_examples/microqrcode.jpg) |
 ### Таблица доступных аугментаций
 
-| Название            | Пример аугментации                                     |
-| ------------------- | ------------------------------------------------------ |
-| BadPhotoCopy        | ![img](augmentations_examples/BadPhotoCopy.jpg)        |
-| BrightnessTexturize | ![img](augmentations_examples/BrightnessTexturize.jpg) |
-| ColorPaper          | ![img](augmentations_examples/ColorPaper.jpg)          |
-| Folding             | ![img](augmentations_examples/Folding.jpg)             |
-| LightingGradient    | ![img](augmentations_examples/LightingGradient.jpg)    |
-| NoisyLines          | ![img](augmentations_examples/NoisyLines.jpg)          |
-| ShadowCast          | ![img](augmentations_examples/ShadowCast.jpg)          |
+| Название            | Пример аугментации                                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| BadPhotoCopy        | <img src="augmentations_examples/BadPhotoCopy.jpg" alt="img" style="max-width: 200px; height:auto;">        |
+| BrightnessTexturize | <img src="augmentations_examples/BrightnessTexturize.jpg" alt="img" style="max-width: 200px; height:auto;"> |
+| ColorPaper          | <img src="augmentations_examples/ColorPaper.jpg" alt="img" style="max-width: 200px; height:auto;">          |
+| Folding             | <img src="augmentations_examples/Folding.jpg" alt="img" style="max-width: 200px; height:auto;">             |
+| LightingGradient    | <img src="augmentations_examples/LightingGradient.jpg" alt="img" style="max-width: 200px; height:auto;">    |
+| NoisyLines          | <img src="augmentations_examples/NoisyLines.jpg" alt="img" style="max-width: 200px; height:auto;">          |
+| ShadowCast          | <img src="augmentations_examples/ShadowCast.jpg" alt="img" style="max-width: 200px; height:auto;">          |
+### Таблица примеров генераций с разными конфигами
+| конфиг                                                                                                                                                                                                                                                                      | результат генерации                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| <pre>{<br>	"name": "no_background_2d",<br>	"barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br>	"augmentations": ["ColorPaper"],<br>	"scale": 1<br>}</pre>                                                                               | <img src="generation_examples/no_background_2d.jpg" alt="img" style="max-width: 200px; height:auto;"> |
+| <pre>{<br>	"name": "no_background",<br>	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>	"scale": 1<br>}</pre>                              | <img src="generation_examples/no_background.jpg" alt="img" style="max-width: 200px; height:auto;">    |
+| <pre>{<br>	"name": "bottles_1d",<br>	"barcode_types": ["ean13", "plessey", "code39", "upca", "code93"],<br>	"augmentations": [],<br>	"source_img": "./bottles.jpg",<br>	"scale": 4<br>}</pre>                                                                               | <img src="generation_examples/bottles_1d.jpg" alt="img" style="max-width: 200px; height:auto;">       |
+| <pre>{<br>	"name": "bottles",<br>	"barcode_types": ["ean13", "azteccode", "aztecrune", "qrcode", "code93", "microqrcode", "datamatrix"],<br>	"augmentations": ["Folding", "BadPhotoCopy", "LightingGradient"],<br>	"source_img": "./bottles.jpg",<br>	"scale": 2<br>}</pre> | <img src="generation_examples/bottles.jpg" alt="img" style="max-width: 200px; height:auto;">          |
+| <pre>{<br>	"name": "waterfall_2d",<br>	"barcode_types": ["datamatrix", "qrcode", "azteccode", "aztecrune", "microqrcode"],<br>	"augmentations": ["ShadowCast", "BadPhotoCopy", "NoisyLines"],<br>	"source_img": "./example.jpg",<br>	"scale": 0.4<br>}</pre>                | <img src="generation_examples/waterfall_2d.jpg" alt="img" style="max-width: 200px; height:auto;">     |
