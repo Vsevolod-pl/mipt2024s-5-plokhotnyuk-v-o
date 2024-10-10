@@ -137,7 +137,7 @@ def export(img, name, coords, dimensions):
 
 
 def generate_distorted(barcode_types, content_barcodes, source_img=None,
-                       augms=[], distortions=None):
+                       augms=[], scale=1, distortions=None):
     '''
     Generates image with barcodes and returns list of coords of barcodes on img
     Parameters:
@@ -166,10 +166,14 @@ def generate_distorted(barcode_types, content_barcodes, source_img=None,
     masks, _ = zip(*[aligned_perspective(np.ones_like(img), dis) for img, dis in zip(barimgs, distortions)])
 
     if source_img is None:
-        width, height, _ = np.max([img.shape for img in imgs], axis=0)*len(imgs)//3
+        width, height, _ = np.max([img.shape for img in imgs], axis=0)*len(imgs)*scale
+        width = round(width)
+        height = round(height)
         combined = np.zeros((width, height, 3), dtype=imgs[0].dtype)
     else:
         combined = plt.imread(source_img)[:, :, :3]
+        if scale != 1:
+            combined = cv2.resize(combined, None, fx=scale, fy=scale)
         width, height, _ = combined.shape
 
     for i in range(len(imgs)):
@@ -200,7 +204,8 @@ if __name__ == '__main__':
         contents = [gens[bar_type]() for bar_type in conf['barcode_types']]
     img, coords = generate_distorted(conf['barcode_types'], contents,
                                      source_img=conf.get('source_img', None),
-                                     augms=conf.get('augmentations', []))
+                                     augms=conf.get('augmentations', []),
+                                     scale=conf.get('scale', 1))
     dimensions = [dims[bar_type] for bar_type in conf['barcode_types']]
     export(img, conf['name'], coords, dimensions)
 
